@@ -4,7 +4,7 @@ from django.http import Http404
 
 from .forms import UserForm
 from app_users.forms import StudentForm
-from app_users.models import Hobby, Student
+from app_users.models import Hobby, Student,Book
 
 User = get_user_model()
 
@@ -113,11 +113,11 @@ def student_create(request, teacher_id):
             student = form.save(commit=False)
             student.teacher = teacher
 
-            for hobby_id in hobbies_list:
-                hobby = Hobby.objects.get(id=hobby_id)
-                # print(hobby)
-                # student.hobbies.add(int(hobby_id))
-                # student.save()
+            # for hobby_id in hobbies_list:
+            #     hobby = Hobby.objects.get(id=hobby_id)
+            #     # print(hobby)
+            #     # student.hobbies.add(int(hobby_id))
+            student.save()
 
 
             return redirect('teacher_students', id=teacher_id)
@@ -171,3 +171,23 @@ def filter_students(request, hobby_id):
         'hobby_name': hobby.name,
     }
     return render(request, 'app_main/filtered_students.html', context)
+
+
+def student_delete(request,student_id):
+    student = get_object_or_404(Student,id =student_id)
+    student.delete()
+    return redirect('teacher_students',id=student.teacher.id)
+
+def student_detail(request,student_id):
+    student = get_object_or_404(Student,id=student_id)
+    teacher = student.teacher
+    hobby = student.hobbies.all
+    
+    context={
+        'student':student,
+        'teacher':teacher,
+        'hobby':hobby,
+        
+    }
+
+    return render(request, 'app_main/student_detail.html',context)
